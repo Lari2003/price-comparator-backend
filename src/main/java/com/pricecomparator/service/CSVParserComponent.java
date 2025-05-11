@@ -22,6 +22,9 @@ public class CSVParserComponent {
         List<Product> products = new ArrayList<>();
         CSVParser csvParser = new CSVParserBuilder().withSeparator(CSV_DELIMITER).build();
 
+        // Derive store name from file path (this can be customized based on how store names are encoded in the path)
+        String storeName = filePath.split("/")[filePath.split("/").length - 1].split("_")[0]; // Assuming store name is part of the file name
+
         try (CSVReader reader = new CSVReaderBuilder(new FileReader(filePath))
                 .withCSVParser(csvParser)
                 .build()) {
@@ -68,8 +71,8 @@ public class CSVParserComponent {
                         quantity = Double.parseDouble(line[4].trim());
                     }
 
-                    // Create product object and add to list
-                    Product product = new Product(productId, productName, category, brand, quantity, unit, price, currency);
+                    // Create product object and add to list, now with storeName
+                    Product product = new Product(productId, productName, category, brand, price, unit, (int) quantity, currency, storeName);
                     products.add(product);
 
                 } catch (Exception e) {

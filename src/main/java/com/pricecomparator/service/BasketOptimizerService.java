@@ -14,10 +14,12 @@ public class BasketOptimizerService {
     private static final Logger logger = LoggerFactory.getLogger(BasketOptimizerService.class);
     private final StoreCSVParser csvParser = new StoreCSVParser();
 
+    // Main method to optimize basket
     public ShoppingList optimizeBasket(List<Product> basket, String[] storeFilePaths, String[] discountFilePaths) {
         Map<String, List<Product>> storeProducts = loadStoreProducts(storeFilePaths);
         Map<String, List<Discount>> storeDiscounts = loadStoreDiscounts(discountFilePaths);
 
+        // Optimize the basket with best prices and discounts
         List<Product> optimizedBasket = basket.stream()
             .map(product -> {
                 Product bestPriceProduct = findBestPriceProduct(product, storeProducts);
@@ -26,19 +28,22 @@ public class BasketOptimizerService {
             })
             .collect(Collectors.toList());
 
+        // Determine the best store and calculate total cost
         String bestStore = determineBestStore(optimizedBasket, storeProducts);
         double totalCost = optimizedBasket.stream()
             .mapToDouble(Product::getPrice)
             .sum();
 
+        // Return the optimized shopping list
         return new ShoppingList(bestStore, optimizedBasket, totalCost);
     }
 
+    // Load products from the store CSV files
     private Map<String, List<Product>> loadStoreProducts(String[] storeFilePaths) {
         Map<String, List<Product>> storeProducts = new HashMap<>();
         for (String filePath : storeFilePaths) {
             try {
-                List<Product> products = csvParser.parseCSV(filePath);
+                List<Product> products = csvParser.parseCSV(filePath, filePath.split("/")[filePath.split("/").length - 1]);
                 storeProducts.put(filePath, products);
             } catch (IOException e) {
                 logger.error("Failed to load products from {}", filePath, e);
@@ -48,6 +53,7 @@ public class BasketOptimizerService {
         return storeProducts;
     }
 
+    // Load discounts from the discount CSV files
     private Map<String, List<Discount>> loadStoreDiscounts(String[] discountFilePaths) {
         Map<String, List<Discount>> storeDiscounts = new HashMap<>();
         for (String filePath : discountFilePaths) {
@@ -62,6 +68,7 @@ public class BasketOptimizerService {
         return storeDiscounts;
     }
 
+    // Find the product with the best price across all stores
     private Product findBestPriceProduct(Product basketProduct, Map<String, List<Product>> storeProducts) {
         return storeProducts.entrySet().stream()
                 .flatMap(entry -> entry.getValue().stream())
@@ -71,8 +78,8 @@ public class BasketOptimizerService {
                     "Product " + basketProduct.getProductId() + " not found in any store"));
     }
 
+    // Create a new product copy and apply discounts
     private Product createDiscountedCopy(Product original, Map<String, List<Discount>> discounts) {
-        // Create new product with same values (without store/date fields)
         Product copy = new Product(
             original.getProductId(),
             original.getProductName(),
@@ -81,12 +88,14 @@ public class BasketOptimizerService {
             original.getPrice(),
             original.getUnit(),
             original.getQuantity(),
-            original.getCurrency()
+            original.getCurrency(),
+            original.getStoreName() // Pass store name to the copy
         );
         applyDiscount(copy, discounts);
         return copy;
     }
 
+    // Apply discount to a product
     private void applyDiscount(Product product, Map<String, List<Discount>> storeDiscounts) {
         storeDiscounts.values().stream()
             .flatMap(List::stream)
@@ -100,16 +109,14 @@ public class BasketOptimizerService {
             });
     }
 
+    // Check if the discount is active
     private boolean isDiscountActive(Discount discount) {
         Date now = new Date();
         return now.after(discount.getFromDate()) && now.before(discount.getToDate());
     }
 
+    // Determine the best store (could be more advanced)
     private String determineBestStore(List<Product> basket, Map<String, List<Product>> storeProducts) {
-        // Simple implementation - returns first store name
-        return storeProducts.keySet().stream()
-            .findFirst()
-            .map(path -> path.replace("src/main/resources/data/", "").split("_")[0])
-            .orElse("Best Store");
+        return basket.isEmpty() ? "Best Store" : basket.get(0).getStoreName();
     }
 }

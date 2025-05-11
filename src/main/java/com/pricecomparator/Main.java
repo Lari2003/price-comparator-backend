@@ -11,9 +11,10 @@ public class Main {
     public static void main(String[] args) {
         // Example basket with products you want to optimize
         List<Product> basket = Arrays.asList(
-            new Product("P001", "lapte zuzu", "lactate", "Zuzu", 5.5, "l", 1, "RON"),
-            new Product("P008", "brânză telemea", "lactate", "Pilos", 12.99, "kg", 1, "RON")
+            new Product("P001", "lapte zuzu", "lactate", "Zuzu", 5.5, "l", 1.0, "RON", "ZuzuStore"),
+            new Product("P008", "brânză telemea", "lactate", "Pilos", 12.99, "kg", 1.0, "RON", "PilosStore")
         );
+
 
 
         // Store CSV file paths

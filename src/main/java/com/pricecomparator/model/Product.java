@@ -9,10 +9,11 @@ public class Product {
     private String unit;
     private double quantity;
     private String currency;
+    private String storeName;
 
     // Constructor
     public Product(String productId, String productName, String category, String brand, 
-                  double price, String unit,double quantity, String currency) {
+                  double price, String unit,double quantity, String currency, String storeName) {
         this.productId = productId;
         this.productName = productName;
         this.category = category;
@@ -21,10 +22,19 @@ public class Product {
         this.unit = unit;
         this.quantity = quantity;
         this.currency = currency;
+        this.storeName = storeName;
         
     }
 
     // Getters and setters
+    public String getStoreName() {
+        return storeName;
+    }
+
+    public void setStoreName(String storeName) {
+        this.storeName = storeName;
+    }
+    
     public String getCurrency() { 
         return currency; }
 

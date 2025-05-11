@@ -21,24 +21,23 @@ import java.util.List;
 // Renamed class
 public class StoreCSVParser {
 
-    // Parse the product CSV
-    public List<Product> parseCSV(String filePath) throws IOException {
+    public List<Product> parseCSV(String filePath, String storeName) throws IOException {
         List<Product> products = new ArrayList<>();
-
+    
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
-
+    
             while ((line = reader.readLine()) != null) {
                 try {
                     // Split the line by the semicolon delimiter
                     String[] values = line.split(";");
-                    
+    
                     // Skip invalid rows with insufficient data
                     if (values.length < 8) {
                         System.err.println("Skipping invalid row (incorrect column count) in " + filePath);
                         continue;
                     }
-
+    
                     // Parse each field with error handling
                     String productId = values[0].trim();
                     String productName = values[1].trim();
@@ -48,7 +47,7 @@ public class StoreCSVParser {
                     double quantity = 0;
                     String unit = values[5].trim();
                     String currency = values[7].trim();
-
+    
                     // Parse price with error handling
                     try {
                         price = Double.parseDouble(values[6].trim());
@@ -56,7 +55,7 @@ public class StoreCSVParser {
                         System.err.println("Invalid price value in row: " + line);
                         continue; // Skip this line
                     }
-
+    
                     // Parse quantity with error handling
                     try {
                         quantity = Double.parseDouble(values[4].trim());
@@ -64,12 +63,12 @@ public class StoreCSVParser {
                         System.err.println("Invalid quantity value in row: " + line);
                         continue; // Skip this line
                     }
-
-                    // Create the Product object
+    
+                    // Create the Product object, including storeName
                     Product product = new Product(
-                        productId, productName, category, brand, price, unit, quantity, currency
+                        productId, productName, category, brand, price, unit, quantity, currency, storeName
                     );
-
+    
                     // Add the product to the list
                     products.add(product);
                 } catch (Exception e) {
@@ -80,7 +79,7 @@ public class StoreCSVParser {
             System.err.println("Error reading file: " + filePath + ": " + e.getMessage());
             throw e; // Re-throw the exception after logging it
         }
-
+    
         return products;
     }
 
